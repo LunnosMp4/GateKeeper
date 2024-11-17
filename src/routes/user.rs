@@ -213,6 +213,22 @@ pub async fn register(db_pool: web::Data<sqlx::PgPool>, req: web::Json<RegisterR
     let hashed_password = hash_password(&req.password).await;
     let api_key = generate_api_key().await;
 
+    let regex = regex::Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
+    if !regex.is_match(&req.email) {
+        return HttpResponse::BadRequest().body("Invalid email address.");
+    }
+
+    let user = sqlx::query!(
+        "SELECT id FROM users WHERE email = $1",
+        req.email
+    )
+        .fetch_optional(db_pool.get_ref())
+        .await;
+
+    if let Ok(Some(_)) = user {
+        return HttpResponse::Conflict().body("User with this email already exists.");
+    }
+
     // Insert user into the database
     let result = sqlx::query!(
         "INSERT INTO users (name, email, password_hash, api_key, permission)
