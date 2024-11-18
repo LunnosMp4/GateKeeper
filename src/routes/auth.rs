@@ -11,6 +11,7 @@ use argon2::{
 
 use super::user::generate_api_key;
 use super::user::User;
+use crate::utils::jwt::create_jwt;
 
 pub async fn hash_password(password: &str) -> String {
     let argon2 = Argon2::default();
@@ -96,7 +97,8 @@ pub async fn login(db_pool: web::Data<sqlx::PgPool>, req: web::Json<LoginRequest
     match user {
         Ok(Some(user)) => {
             if verify_password(&req.password, &user.password_hash).await {
-                HttpResponse::Ok().json(user)
+                let token = create_jwt(&user.id.to_string());
+                HttpResponse::Ok().json(token)
             } else {
                 HttpResponse::Unauthorized().finish()
             }

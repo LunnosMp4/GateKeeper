@@ -14,3 +14,6 @@ rand = "0.8.5"
 argon2 = "0.6.0-pre.1"
 regex = "1.11.1"
 chrono = "0.4.38"
+jsonwebtoken = "9.3.0"
+time = { version = "0.3.36", features = ["serde"] }
+serde_with = "3.11.0"

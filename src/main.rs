@@ -13,10 +13,15 @@ mod middlewares {
     pub mod api_key_validator;
     pub mod admin_validator;
     pub mod api_usage_logger;
+    pub mod jwt_validator;
 }
 
 mod models {
     pub mod api_usage;
+}
+
+mod utils {
+    pub mod jwt;
 }
 
 use actix_web::{web, App, HttpServer};
@@ -40,8 +45,11 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(middlewares::simple_logger::SimpleLogger)
             .app_data(web::Data::new(db_pool.clone()))
+            .route("/login", web::post().to(routes::auth::login))
+            .route("/register", web::post().to(routes::auth::register))
             .service(
                 web::scope("/dashboard")
+                    .wrap(middlewares::jwt_validator::JwtValidator)
                     .service(
                         web::scope("/admin")
                             .wrap(middlewares::admin_validator::AdminValidator::new(db_pool.clone()))
@@ -52,8 +60,7 @@ async fn main() -> std::io::Result<()> {
                             .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission)),
                     )
                     .route("/users/{id}/refresh_api_key", web::post().to(routes::user::refresh_api_key))
-                    .route("/login", web::post().to(routes::auth::login))
-                    .route("/register", web::post().to(routes::auth::register))
+                    .route("/get_random_number", web::get().to(routes::api::get_random_number::get_random_number))
             )
 
             .service(
