@@ -80,7 +80,7 @@ where
                 .map(|r| r.id)
                 .unwrap();
 
-            sqlx::query!(
+            let _ = sqlx::query!(
                 r#"
                 INSERT INTO api_usage (user_id, api_key, request_path, request_method, request_time, request_ip, status_code)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)

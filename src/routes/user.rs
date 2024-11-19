@@ -60,9 +60,6 @@ pub async fn get_user_by_id(db_pool: web::Data<PgPool>, path: web::Path<i32>) ->
 pub struct NewUser {
     pub name: String,
     pub email: String,
-    pub password_hash: String,
-    pub api_key: Option<String>,
-    pub permission: i16,
 }
 
 // Generate a new API key

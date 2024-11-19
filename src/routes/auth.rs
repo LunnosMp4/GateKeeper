@@ -1,6 +1,6 @@
-use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use actix_web::{web, HttpResponse, Responder};
+use serde::{Deserialize};
 use argon2::{
     password_hash::{
         rand_core::OsRng,
@@ -38,7 +38,7 @@ pub struct RegisterRequest {
     pub password: String,
 }
 
-pub async fn register(db_pool: web::Data<sqlx::PgPool>, req: web::Json<RegisterRequest>) -> impl Responder {
+pub async fn register(db_pool: web::Data<PgPool>, req: web::Json<RegisterRequest>) -> impl Responder {
     let hashed_password = hash_password(&req.password).await;
     let api_key = generate_api_key().await;
 
@@ -85,7 +85,7 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-pub async fn login(db_pool: web::Data<sqlx::PgPool>, req: web::Json<LoginRequest>) -> impl Responder {
+pub async fn login(db_pool: web::Data<PgPool>, req: web::Json<LoginRequest>) -> impl Responder {
     let user = sqlx::query_as!(
         User,
         "SELECT id, name, email, api_key, permission, password_hash FROM users WHERE email = $1",

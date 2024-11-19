@@ -1,4 +1,3 @@
-use actix_web::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use time::PrimitiveDateTime;
 

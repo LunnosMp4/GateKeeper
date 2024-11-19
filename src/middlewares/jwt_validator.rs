@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use actix_web::dev::{Transform, Service};
 use futures::future::{ok, Ready};
 use futures::Future;
@@ -16,8 +16,8 @@ where
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type InitError = ();
     type Transform = JwtValidatorMiddleware<S>;
+    type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {

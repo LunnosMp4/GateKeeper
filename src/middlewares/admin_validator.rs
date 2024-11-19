@@ -1,4 +1,3 @@
-use actix_web::HttpResponse;
 use std::pin::Pin;
 use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
@@ -67,7 +66,7 @@ where
         let fut = self.service.call(req);
 
         Box::pin(async move {
-            if let Some(api_key) = api_key {
+            return if let Some(api_key) = api_key {
                 let user = sqlx::query!(
                 "SELECT permission FROM users WHERE api_key = $1",
                 api_key
@@ -77,17 +76,17 @@ where
 
                 if let Ok(Some(user)) = user {
                     if user.permission == 1 {
-                        return fut.await;
+                        fut.await
                     } else {
-                        return Err(actix_web::error::ErrorUnauthorized(
+                        Err(actix_web::error::ErrorUnauthorized(
                             "You are not authorized to access this resource",
-                        ));
+                        ))
                     }
                 } else {
-                    return Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"));
+                    Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"))
                 }
             } else {
-                return Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"));
+                Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"))
             }
         })
     }
