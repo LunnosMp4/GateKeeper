@@ -10,12 +10,40 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:latest
     container_name: redis_container
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rust-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rust_app
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/gatekeeper
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres_data:
