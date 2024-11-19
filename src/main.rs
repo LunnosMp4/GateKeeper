@@ -14,6 +14,7 @@ mod middlewares {
     pub mod admin_validator;
     pub mod api_usage_logger;
     pub mod jwt_validator;
+    pub mod rate_limiter;
 }
 
 mod models {
@@ -39,6 +40,10 @@ async fn main() -> std::io::Result<()> {
         .connect(&database_url)
         .await
         .expect("Failed to create pool");
+
+    // Create Redis connection pool
+    let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
 
     // Start HTTP server
     HttpServer::new(move || {
@@ -67,6 +72,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .wrap(middlewares::api_key_validator::ApiKeyValidator::new(db_pool.clone()))
                     .wrap(middlewares::api_usage_logger::ApiUsageLogger::new(db_pool.clone()))
+                    .wrap(middlewares::rate_limiter::RateLimiter::new(redis_client.clone(), 5, std::time::Duration::from_secs(60)))
                     .service(
                         web::scope("/v1")
                             .route("/get_random_number", web::get().to(routes::api::get_random_number::get_random_number)),
