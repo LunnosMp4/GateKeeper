@@ -1,8 +1,5 @@
 use std::pin::Pin;
-use actix_web::{
-    dev::{Service, ServiceRequest, ServiceResponse, Transform},
-    Error,
-};
+use actix_web::{dev::{Service, ServiceRequest, ServiceResponse, Transform}, Error, HttpMessage};
 use futures::future::{ok, Ready};
 use std::task::{Context, Poll};
 use sqlx::PgPool;
@@ -57,37 +54,39 @@ where
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let db_pool = self.db_pool.clone();
 
-        let api_key = req
-            .headers()
-            .get("x-api-key")
-            .and_then(|v| v.to_str().ok())
-            .map(String::from);
+        let user_id = req
+            .extensions()
+            .get::<String>()
+            .cloned()
+            .and_then(|id| id.parse::<i32>().ok());
 
         let fut = self.service.call(req);
 
         Box::pin(async move {
-            return if let Some(api_key) = api_key {
-                let user = sqlx::query!(
-                "SELECT permission FROM users WHERE api_key = $1",
-                api_key
-            )
-                    .fetch_optional(&db_pool)
-                    .await;
+            let user_id = match user_id {
+                Some(id) => id,
+                None => return Err(actix_web::error::ErrorUnauthorized("User ID not found")),
+            };
 
-                if let Ok(Some(user)) = user {
+            let permission = sqlx::query!("SELECT permission FROM users WHERE id = $1", user_id)
+                .fetch_one(&db_pool)
+                .await;
+
+            match permission {
+                Ok(user) => {
                     if user.permission == 1 {
                         fut.await
                     } else {
                         Err(actix_web::error::ErrorUnauthorized(
-                            "You are not authorized to access this resource",
+                            "You do not have permission to access this resource",
                         ))
                     }
-                } else {
-                    Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"))
                 }
-            } else {
-                Err(actix_web::error::ErrorUnauthorized("Invalid or missing API key"))
+                Err(_) => Err(actix_web::error::ErrorUnauthorized(
+                    "You do not have permission to access this resource",
+                )),
             }
         })
     }
+
 }

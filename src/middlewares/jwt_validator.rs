@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
+use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error, HttpMessage};
 use actix_web::dev::{Transform, Service};
 use futures::future::{ok, Ready};
 use futures::Future;
@@ -47,7 +47,10 @@ where
         let token = req.headers().get("Authorization").and_then(|v| v.to_str().ok());
 
         if let Some(token) = token {
-            if validate_jwt(token) {
+            if let Some(user_id) = validate_jwt(token) {
+                // Attach the user ID to the request extensions for downstream use
+                req.extensions_mut().insert(user_id);
+
                 let fut = self.service.call(req);
                 return Box::pin(async move {
                     let res = fut.await?;

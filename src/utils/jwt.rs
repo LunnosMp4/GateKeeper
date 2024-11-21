@@ -24,7 +24,14 @@ pub fn create_jwt(user_id: &str) -> String {
     encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET_KEY)).unwrap()
 }
 
-pub fn validate_jwt(token: &str) -> bool {
+pub fn validate_jwt(token: &str) -> Option<String> {
     let validation = Validation::default();
-    decode::<Claims>(token, &DecodingKey::from_secret(SECRET_KEY), &validation).is_ok()
+    match decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(SECRET_KEY),
+        &validation,
+    ) {
+        Ok(token_data) => Some(token_data.claims.sub), // Return the user ID
+        Err(_) => None, // Return None if validation fails
+    }
 }
