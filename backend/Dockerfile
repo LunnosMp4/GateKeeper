@@ -11,7 +11,7 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo fetch
 
 # Copy the source code
-COPY . .
+COPY .. .
 
 # Install cargo-watch for automatic reloading (optional for hot-reloading)
 RUN cargo install cargo-watch
