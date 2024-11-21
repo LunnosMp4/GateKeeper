@@ -1,5 +1,5 @@
 use sqlx::PgPool;
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use serde::{Deserialize};
 use argon2::{
     password_hash::{
@@ -104,6 +104,35 @@ pub async fn login(db_pool: web::Data<PgPool>, req: web::Json<LoginRequest>) -> 
             }
         }
         Ok(None) => HttpResponse::Unauthorized().finish(),
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}
+
+pub async fn verify(db_pool: web::Data<PgPool>, req: HttpRequest, ) -> impl Responder {
+    let user_id = req
+        .extensions()
+        .get::<String>()
+        .cloned()
+        .and_then(|id| id.parse::<i32>().ok());
+
+    let user = sqlx::query!(
+        "SELECT id, name, email, api_key, permission, password_hash FROM users WHERE id = $1",
+        user_id
+    )
+        .fetch_optional(db_pool.get_ref())
+        .await;
+
+    match user {
+        Ok(Some(record)) => {
+            let response = serde_json::json!({
+                "name": record.name,
+                "email": record.email,
+                "api_key": record.api_key,
+                "permission": record.permission,
+            });
+            HttpResponse::Ok().json(response)
+        }
+        Ok(None) => HttpResponse::NotFound().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }

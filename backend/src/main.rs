@@ -27,6 +27,7 @@ mod utils {
 }
 
 use actix_web::{web, App, HttpServer};
+use actix_cors::Cors;
 use sqlx::postgres::PgPoolOptions;
 
 #[actix_web::main]
@@ -48,7 +49,15 @@ async fn main() -> std::io::Result<()> {
 
     // Start HTTP server
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000") // Allow requests from your frontend
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allow specific HTTP methods
+            .allowed_headers(vec!["Content-Type", "Authorization"]) // Allow specific headers
+            .allow_any_header()
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(db_pool.clone()))
             .route("/login", web::post().to(routes::auth::login))
             .route("/register", web::post().to(routes::auth::register))
@@ -65,7 +74,7 @@ async fn main() -> std::io::Result<()> {
                             .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission)),
                     )
                     .route("/users/{id}/refresh_api_key", web::post().to(routes::user::refresh_api_key))
-                    .route("/get_random_number", web::get().to(routes::api::v1::get_random_number::get_random_number))
+                    .route("/verify", web::get().to(routes::auth::verify))
             )
 
             .service(
@@ -77,7 +86,7 @@ async fn main() -> std::io::Result<()> {
                         web::scope("/v1")
                             .route("/get_random_number", web::get().to(routes::api::v1::get_random_number::get_random_number)),
                     )
-                    // TODO: Add GraphQL endpoint here
+                // TODO: Add GraphQL endpoint here
             )
             .route("/ping", web::get().to(routes::health_check::health_check))
     })
