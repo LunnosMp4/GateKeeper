@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
@@ -134,13 +134,17 @@ pub async fn delete_user(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> im
  *
  * @return impl Responder
  */
-pub async fn refresh_api_key(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> impl Responder {
-    let id = path.into_inner();
+pub async fn refresh_api_key(db_pool: web::Data<PgPool>, req: HttpRequest,) -> impl Responder {
+    let user_id = req
+        .extensions()
+        .get::<String>()
+        .cloned()
+        .and_then(|id| id.parse::<i32>().ok());
     let api_key = generate_api_key().await;
 
     let result = sqlx::query!("UPDATE users SET api_key = $1 WHERE id = $2",
         api_key,
-        id
+        user_id
     )
         .execute(&**db_pool)
         .await;

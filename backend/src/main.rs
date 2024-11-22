@@ -73,7 +73,7 @@ async fn main() -> std::io::Result<()> {
                             .route("/users/{id}", web::delete().to(routes::user::delete_user))
                             .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission)),
                     )
-                    .route("/users/{id}/refresh_api_key", web::post().to(routes::user::refresh_api_key))
+                    .route("/users/refresh_api_key", web::post().to(routes::user::refresh_api_key))
                     .route("/verify", web::get().to(routes::auth::verify))
             )
 
