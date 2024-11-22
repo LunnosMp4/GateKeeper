@@ -37,9 +37,8 @@ router.beforeEach(async (to, from, next) => {
 
       if (response.status === 200) {
         const userData = await response.json();
-        // Attach user data to the route's meta property
         to.meta.user = userData;
-        next(); // Proceed to the route
+        next();
       } else {
         localStorage.removeItem("authToken");
         next("/login");
@@ -52,7 +51,6 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
 });
-
 
 
 export default router;

@@ -5,35 +5,33 @@
 </template>
 
 <style>
-/* Example styles */
-body {
-  font-family: Arial, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+html, body, #app {
   margin: 0;
   padding: 0;
+  height: 100%;
+  background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+  display: flex; /* Use flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: flex-start;
+  font-family: 'Roboto', sans-serif;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  width: 300px;
-  margin: 0 auto;
-}
-
-label {
-  margin-top: 10px;
-}
-
-input {
-  margin-top: 5px;
-  padding: 8px;
-  font-size: 14px;
-}
-
+/* Button styles */
 button {
-  margin-top: 20px;
-  padding: 10px;
+  padding: 10px 20px;
+  background: #007BFF;
+  color: white;
   font-size: 16px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background: #0056b3;
 }
 
 </style>
