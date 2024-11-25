@@ -10,7 +10,7 @@ The backend is implemented in Rust using the Actix-web framework. It includes th
 
 - User authentication and registration
 - Admin dashboard for managing users
-- **PostgresSQL** for database management
+- **PostgreSQL** for database management
 - **Redis** for caching and rate limiting
 - **GraphQL** API for querying data
 - **REST API** for user management
@@ -32,6 +32,43 @@ The backend is implemented in Rust using the Actix-web framework. It includes th
 4. Create a `.env` file and set the required environment variables (`DATABASE_URL`, `REDIS_URL`, etc.).
 5. Run `cargo build` to build the project.
 6. Run `cargo run` to start the server.
+
+### Database Configuration
+
+The following PostgreSQL tables are used in this project:
+
+#### Table: `users`
+
+Stores user information and authentication details.
+
+```sql
+CREATE TABLE public.users (
+    id integer NOT NULL DEFAULT nextval('public.users_id_seq'::regclass),
+    name character varying(100) NOT NULL,
+    email character varying(100) NOT NULL,
+    api_key text,
+    permission smallint DEFAULT 0 NOT NULL,
+    password_hash text DEFAULT ''::text NOT NULL
+);
+```
+
+#### Table: `api_usage`
+
+Tracks API usage, including details of the request and response.
+
+```sql
+CREATE TABLE public.api_usage (
+    id integer NOT NULL DEFAULT nextval('public.api_usage_id_seq'::regclass),
+    user_id integer NOT NULL,
+    api_key character varying NOT NULL,
+    request_path character varying NOT NULL,
+    request_method character varying NOT NULL,
+    request_time timestamp without time zone DEFAULT now() NOT NULL,
+    request_ip character varying NOT NULL,
+    status_code integer NOT NULL
+);
+```
+
 
 ### API
 
@@ -86,7 +123,7 @@ The project includes Docker configurations for both the backend and frontend.
 
 For the moment the frontend is not included in the Docker configuration.
 
-Starting Docker containers will start Rust, PostgresSQL and Redis services as well a `http://localhost:8080`.
+Starting Docker containers will start Rust, PostgreSQL and Redis services as well a `http://localhost:8080`.
 
 ## File Structure
 

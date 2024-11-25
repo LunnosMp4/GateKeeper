@@ -40,7 +40,7 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=debug");
 
-    // Create PostgresSQL connection pool
+    // Create PostgreSQL connection pool
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_pool = PgPoolOptions::new()
         .max_connections(5)
