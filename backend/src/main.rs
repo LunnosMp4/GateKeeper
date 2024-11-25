@@ -7,6 +7,11 @@ mod routes {
         pub mod v1 {
             pub mod get_random_number;
         }
+
+        pub mod graphql {
+            pub mod setup;
+            pub mod schema;
+        }
     }
 }
 
@@ -47,6 +52,9 @@ async fn main() -> std::io::Result<()> {
     let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set");
     let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
 
+    // Create GraphQL schema
+    let schema = routes::api::graphql::schema::create_schema();
+
     // Start HTTP server
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -59,6 +67,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(db_pool.clone()))
+            .app_data(web::Data::new(schema.clone()))
             .route("/login", web::post().to(routes::auth::login))
             .route("/register", web::post().to(routes::auth::register))
             .service(
@@ -81,13 +90,17 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .wrap(middlewares::api_key_validator::ApiKeyValidator::new(db_pool.clone()))
                     .wrap(middlewares::api_usage_logger::ApiUsageLogger::new(db_pool.clone()))
-                    .wrap(middlewares::rate_limiter::RateLimiter::new(redis_client.clone(), 5, std::time::Duration::from_secs(60)))
                     .service(
                         web::scope("/v1")
+                            .wrap(middlewares::rate_limiter::RateLimiter::new(redis_client.clone(), 5, std::time::Duration::from_secs(60)))
                             .route("/get_random_number", web::get().to(routes::api::v1::get_random_number::get_random_number)),
                     )
-                // TODO: Add GraphQL endpoint here
+                    .service(
+                        web::resource("/graphql")
+                            .route(web::post().to(routes::api::graphql::setup::graphql_handler))
+                    )
             )
+            .route("/playground", web::get().to(routes::api::graphql::setup::graphql_playground))
             .route("/ping", web::get().to(routes::health_check::health_check))
     })
         .bind("0.0.0.0:8080")?
