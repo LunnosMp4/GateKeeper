@@ -6,8 +6,11 @@ Build a high-performance API Gateway in Rust that acts as a central hub for mana
 
 
 - **PostgreSQL and Redis status:**
-    
+  
     - [![Start Postgres and Redis Services](https://github.com/LunnosMp4/GateKeeper/actions/workflows/docker-services.yml/badge.svg)](https://github.com/LunnosMp4/GateKeeper/actions/workflows/docker-services.yml)
+- **Frontend Build and Run status:**
+  
+    - [![Frontend CI/CD](https://github.com/LunnosMp4/GateKeeper/actions/workflows/frontend.yml/badge.svg)](https://github.com/LunnosMp4/GateKeeper/actions/workflows/frontend.yml)
 
 ## Backend
 
