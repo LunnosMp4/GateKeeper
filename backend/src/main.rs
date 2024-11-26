@@ -83,6 +83,7 @@ async fn main() -> std::io::Result<()> {
                             .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission)),
                     )
                     .route("/users/refresh_api_key", web::post().to(routes::user::refresh_api_key))
+                    .route("/get_api_key_usage/{size}", web::get().to(routes::user::get_api_key_usage))
                     .route("/verify", web::get().to(routes::auth::verify))
             )
 

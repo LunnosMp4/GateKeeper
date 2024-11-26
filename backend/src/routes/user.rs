@@ -1,7 +1,8 @@
+use crate::models::api_usage::ApiUsageResponse;
+use crate::models::api_usage::ApiUsage;
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -172,5 +173,63 @@ pub async fn change_permission(db_pool: web::Data<PgPool>, path: web::Path<(i32,
     match result {
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}
+
+pub async fn get_api_key_usage(
+    db_pool: web::Data<PgPool>,
+    req: HttpRequest,
+    path: web::Path<i32>,
+) -> impl Responder {
+    let size = path.into_inner(); // Maximum number of requests to fetch
+
+    let user_id = req
+        .extensions()
+        .get::<String>()
+        .and_then(|id| id.parse::<i32>().ok());
+
+    if let Some(user_id) = user_id {
+        let result = sqlx::query_as!(
+            ApiUsage,
+            r#"
+            SELECT
+                id, user_id, api_key, request_path, request_method,
+                request_time, request_ip, status_code
+            FROM api_usage
+            WHERE user_id = $1
+            ORDER BY request_time DESC
+            LIMIT $2
+            "#,
+            user_id,
+            size as i64
+        )
+            .fetch_all(&**db_pool)
+            .await;
+
+        match result {
+            Ok(api_usages) => {
+                let api_usage_responses: Vec<ApiUsageResponse> = api_usages
+                    .into_iter()
+                    .map(|usage| ApiUsageResponse {
+                        id: usage.id,
+                        user_id: usage.user_id,
+                        api_key: usage.api_key,
+                        request_path: usage.request_path,
+                        request_method: usage.request_method,
+                        request_time: usage.request_time.to_string(),
+                        request_ip: usage.request_ip,
+                        status_code: usage.status_code,
+                    })
+                    .collect();
+
+                HttpResponse::Ok().json(api_usage_responses)
+            }
+            Err(e) => {
+                eprintln!("Error fetching API usage: {:?}", e);
+                HttpResponse::InternalServerError().body("Error fetching API usage")
+            }
+        }
+    } else {
+        HttpResponse::BadRequest().body("Invalid user ID")
     }
 }

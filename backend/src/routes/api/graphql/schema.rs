@@ -1,4 +1,4 @@
-use async_graphql::{Schema, Object, Context, Result};
+use async_graphql::{Schema, Object, Context};
 
 pub struct Query;
 
