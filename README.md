@@ -4,6 +4,11 @@
 
 Build a high-performance API Gateway in Rust that acts as a central hub for managing, monitoring, and forwarding client requests to backend microservices. The gateway provides secure authentication (API keys with optional OAuth2 and JWT support), rate limiting, caching, and request routing. It includes detailed logging and analytics, a developer interface for generating and managing API keys, and a dashboard for visualizing key statistics—all designed for scalability and handling thousands of concurrent requests.
 
+
+- **PostgreSQL and Redis status:**
+    
+    - [![Start Postgres and Redis Services](https://github.com/LunnosMp4/GateKeeper/actions/workflows/docker-services.yml/badge.svg)](https://github.com/LunnosMp4/GateKeeper/actions/workflows/docker-services.yml)
+
 ## Backend
 
 The backend is implemented in Rust using the Actix-web framework. It includes the following features:
