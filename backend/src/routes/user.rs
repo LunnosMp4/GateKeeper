@@ -1,8 +1,22 @@
-use crate::models::api_usage::ApiUsageResponse;
-use crate::models::api_usage::ApiUsage;
 use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use crate::models::api_usage::{ApiUsage, ApiUsageResponse};
+use crate::routes;
+use actix_web::web::ServiceConfig;
+
+pub fn configure_user_routes(cfg: &mut ServiceConfig) {
+    cfg.service(
+        web::scope("users")
+            .route("/{id}/revoke", web::post().to(routes::user::revoke))
+            .route("/{id}/create_api_key", web::post().to(routes::user::create_api_key))
+            .route("/{id}/{permission}", web::post().to(routes::user::change_permission))
+            .route("/{id}", web::delete().to(routes::user::delete_user))
+            .route("/{id}", web::get().to(routes::user::get_user_by_id))
+            .route("", web::post().to(routes::user::add_user))
+            .route("", web::get().to(routes::user::get_users))
+    );
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -14,13 +28,6 @@ pub struct User {
     pub permission: i16,
 }
 
-/**
- * Get all users from the database
- *
- * @param db_pool: web::Data<PgPool>
- *
- * @return impl Responder
- */
 pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
     let result = sqlx::query_as!(User, "SELECT id, name, email, api_key, permission, password_hash FROM users")
         .fetch_all(&**db_pool)
@@ -32,15 +39,6 @@ pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
     }
 }
 
-/**
- * Get user by ID
- *
- * @param db_pool: web::Data<PgPool>
- *
- * @param path: web::Path<i32>
- *
- * @return impl Responder
- */
 pub async fn get_user_by_id(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> impl Responder {
     let id = path.into_inner();
 
@@ -63,7 +61,6 @@ pub struct NewUser {
     pub email: String,
 }
 
-// Generate a new API key
 pub async fn generate_api_key() -> String {
     use rand::distributions::Alphanumeric;
     use rand::{thread_rng, Rng};
@@ -75,15 +72,6 @@ pub async fn generate_api_key() -> String {
         .collect()
 }
 
-/**
- * Add a new user
- *
- * @param db_pool: web::Data<PgPool>
- *
- * @param new_user: web::Json<NewUser>
- *
- * @return impl Responder
- */
 pub async fn add_user(db_pool: web::Data<PgPool>, new_user: web::Json<NewUser>) -> impl Responder {
     let api_key = generate_api_key().await;
 
@@ -102,15 +90,6 @@ pub async fn add_user(db_pool: web::Data<PgPool>, new_user: web::Json<NewUser>) 
     }
 }
 
-/**
- * Delete user by ID
- *
- * @param db_pool: web::Data<PgPool>
- *
- * @param path: web::Path<i32>
- *
- * @return impl Responder
- */
 pub async fn delete_user(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> impl Responder {
     let id = path.into_inner();
 
@@ -126,15 +105,6 @@ pub async fn delete_user(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> im
     }
 }
 
-/**
- * Refresh API key
- *
- * @param db_pool: web::Data<PgPool>
- *
- * @param path: web::Path<i32>
- *
- * @return impl Responder
- */
 pub async fn refresh_api_key(db_pool: web::Data<PgPool>, req: HttpRequest,) -> impl Responder {
     let user_id = req
         .extensions()
