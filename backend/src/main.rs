@@ -76,11 +76,13 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::scope("/admin")
                             .wrap(middlewares::admin_validator::AdminValidator::new(db_pool.clone()))
-                            .route("/users", web::get().to(routes::user::get_users))
+                            .route("/users/{id}/revoke", web::post().to(routes::user::revoke))
+                            .route("/users/{id}/create_api_key", web::post().to(routes::user::create_api_key))
+                            .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission))
+                            .route("/users/{id}", web::delete().to(routes::user::delete_user))
                             .route("/users/{id}", web::get().to(routes::user::get_user_by_id))
                             .route("/users", web::post().to(routes::user::add_user))
-                            .route("/users/{id}", web::delete().to(routes::user::delete_user))
-                            .route("/users/{id}/{permission}", web::post().to(routes::user::change_permission)),
+                            .route("/users", web::get().to(routes::user::get_users)),
                     )
                     .route("/users/refresh_api_key", web::post().to(routes::user::refresh_api_key))
                     .route("/get_api_key_usage/{size}", web::get().to(routes::user::get_api_key_usage))

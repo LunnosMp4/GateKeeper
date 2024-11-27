@@ -176,6 +176,37 @@ pub async fn change_permission(db_pool: web::Data<PgPool>, path: web::Path<(i32,
     }
 }
 
+pub async fn revoke(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> impl Responder {
+    let id = path.into_inner();
+
+    let result = sqlx::query!("UPDATE users SET api_key = NULL WHERE id = $1",
+        id
+    )
+        .execute(&**db_pool)
+        .await;
+
+    match result {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}
+
+pub async fn create_api_key(db_pool: web::Data<PgPool>, path: web::Path<i32>) -> impl Responder {
+    let id = path.into_inner();
+
+    let result = sqlx::query!("UPDATE users SET api_key = $1 WHERE id = $2",
+        generate_api_key().await,
+        id
+    )
+        .execute(&**db_pool)
+        .await;
+
+    match result {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}
+
 pub async fn get_api_key_usage(
     db_pool: web::Data<PgPool>,
     req: HttpRequest,
