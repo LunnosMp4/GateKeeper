@@ -10,8 +10,7 @@
 html, body, #app {
   margin: 0;
   padding: 0;
-  height: 100%;
-  background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+  background-color: #a6c1ee;
   display: flex; /* Use flexbox */
   justify-content: center; /* Center horizontally */
   align-items: flex-start;
@@ -24,6 +23,7 @@ button {
   background: #007BFF;
   color: white;
   font-size: 16px;
+  margin-right: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
