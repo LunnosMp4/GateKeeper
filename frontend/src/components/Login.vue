@@ -51,7 +51,6 @@ export default {
 </script>
 
 <style>
-/* Base styles for the login container */
 .login {
   width: 400px;
   margin: 0 auto;
@@ -63,14 +62,12 @@ export default {
   text-align: center;
 }
 
-/* Heading styles */
 .login h2 {
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
 }
 
-/* Form styles */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -103,7 +100,6 @@ input:focus {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* Register link styles */
 .register-link {
   margin-top: 20px;
   font-size: 14px;

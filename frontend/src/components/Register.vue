@@ -55,7 +55,6 @@ export default {
 </script>
 
 <style>
-/* Base styles for the register container */
 .register {
   width: 400px;
   margin: 0 auto;
@@ -67,14 +66,12 @@ export default {
   text-align: center;
 }
 
-/* Heading styles */
 .register h2 {
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
 }
 
-/* Form styles */
 .register-form {
   display: flex;
   flex-direction: column;
@@ -107,7 +104,6 @@ input:focus {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* Login link styles */
 .login-link {
   margin-top: 20px;
   font-size: 14px;

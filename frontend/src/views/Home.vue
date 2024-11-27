@@ -2,8 +2,9 @@
   <div>
     <h1>Welcome, {{ user.name }}!</h1>
     <p>Email: {{ user.email }}</p>
-    <p>Your API token is: {{ user.api_key }}</p>
-    <button @click="handleRefreshApiKey">Refresh API Key</button>
+    <p v-if="user.api_key">Your API token is: {{ user.api_key }}</p>
+    <p v-else style="color: red;">Your API token has been revoked. If you think this is a mistake, please contact an administrator.</p>
+    <button v-if="user.api_key" @click="handleRefreshApiKey">Refresh API Key</button>
     <br />
     <br />
     <router-link v-if="user.permission == 1" to="/admin">Admin Page</router-link>
@@ -20,13 +21,11 @@
     <p v-if="error">{{ error }}</p>
 
     <div v-if="stats.length">
-      <!-- Key Statistics -->
       <p>Total Requests: {{ stats.length }}</p>
       <p>Success Rate: {{ successRate }}%</p>
       <p>Average Requests per Endpoint: {{ averageRequestsPerEndpoint }}</p>
       <br />
 
-      <!-- Table -->
       <h3>Request Details</h3>
       <table>
         <thead>
@@ -53,7 +52,6 @@
 
       <br />
 
-      <!-- Charts -->
       <h3>Graphical Analysis</h3>
       <canvas id="endpointChart"></canvas>
       <br />
@@ -146,7 +144,6 @@ export default {
         });
     },
     renderCharts() {
-      // Use Vue's nextTick to ensure DOM elements are ready
       this.$nextTick(() => {
         const endpointCounts = this.stats.reduce((acc, stat) => {
           acc[stat.request_path] = (acc[stat.request_path] || 0) + 1;
@@ -158,11 +155,9 @@ export default {
           return acc;
         }, {});
 
-        // Destroy existing charts if they exist
         if (this.endpointChart) this.endpointChart.destroy();
         if (this.statusCodeChart) this.statusCodeChart.destroy();
 
-        // Check if canvas elements exist before creating charts
         const endpointCanvas = document.getElementById("endpointChart");
         const statusCodeCanvas = document.getElementById("statusCodeChart");
 

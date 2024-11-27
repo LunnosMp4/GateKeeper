@@ -11,13 +11,12 @@ html, body, #app {
   margin: 0;
   padding: 0;
   background-color: #a6c1ee;
-  display: flex; /* Use flexbox */
-  justify-content: center; /* Center horizontally */
+  display: flex;
+  justify-content: center;
   align-items: flex-start;
   font-family: 'Roboto', sans-serif;
 }
 
-/* Button styles */
 button {
   padding: 10px 20px;
   background: #007BFF;
