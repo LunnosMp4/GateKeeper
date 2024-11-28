@@ -24,12 +24,15 @@ jobs:
           override: true
 
       - name: Install dependencies
+        working-directory: backend
         run: cargo fetch
 
       - name: Run tests
+        working-directory: backend
         run: cargo test --verbose
 
       - name: Build project
+        working-directory: backend
         run: cargo build --release
 
       - name: Upload Build Artifacts
