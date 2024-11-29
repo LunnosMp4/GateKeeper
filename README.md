@@ -127,11 +127,18 @@ The project includes Docker configurations for both the backend and frontend.
 
 1. Install Docker.
 2. Navigate to the backend directory of the project.
-3. Run `docker-compose up` to build and start the containers.
+3. Docker containers can be started using the following command:
 
-For the moment the frontend is not included in the Docker configuration.
+If you want to only run PostgreSQL and Redis services, you can use the following command:
+```bash
+docker-compose -f docker-compose.yml up
+```
 
-Starting Docker containers will start Rust, PostgreSQL and Redis services as well a `http://localhost:8080`.
+However, if you want to run all backend and frontend services, you can use the following command:
+```bash
+  docker-compose -f docker-compose.yml -f docker-compose.release.yml up
+```
+
 
 ## File Structure
 
@@ -147,6 +154,7 @@ Starting Docker containers will start Rust, PostgreSQL and Redis services as wel
 │   │   └── graphql
 │   ├── Dockerfile
 │   ├── docker-compose.yml
+│   ├── docker-compose.release.yml
 │   ├── .env
 │   └── Cargo.toml
 ├── frontend
@@ -155,6 +163,7 @@ Starting Docker containers will start Rust, PostgreSQL and Redis services as wel
 │   │   ├── router
 │   │   ├── views
 │   │   └── components
+│   ├── Dockerfile
 │   └── package.json
 └── README.md
 ```
