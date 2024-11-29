@@ -2,19 +2,18 @@ use actix_web::{web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use crate::models::api_usage::{ApiUsage, ApiUsageResponse};
-use crate::routes;
 use actix_web::web::ServiceConfig;
 
 pub fn configure_user_routes(cfg: &mut ServiceConfig) {
     cfg.service(
         web::scope("users")
-            .route("/{id}/revoke", web::post().to(routes::user::revoke))
-            .route("/{id}/create_api_key", web::post().to(routes::user::create_api_key))
-            .route("/{id}/{permission}", web::post().to(routes::user::change_permission))
-            .route("/{id}", web::delete().to(routes::user::delete_user))
-            .route("/{id}", web::get().to(routes::user::get_user_by_id))
-            .route("", web::post().to(routes::user::add_user))
-            .route("", web::get().to(routes::user::get_users))
+            .route("/{id}/revoke", web::post().to(revoke))
+            .route("/{id}/create_api_key", web::post().to(create_api_key))
+            .route("/{id}/{permission}", web::post().to(change_permission))
+            .route("/{id}", web::delete().to(delete_user))
+            .route("/{id}", web::get().to(get_user_by_id))
+            .route("", web::post().to(add_user))
+            .route("", web::get().to(get_users))
     );
 }
 
